@@ -196,7 +196,7 @@
             weightInput.value = weight;
 
             // Final exam calculation
-            const required = (desired - current * (1 - weight / 100)) / (weight / 100);
+            const required = Math.min((desired - current * (1 - weight / 100)) / (weight / 100),100);
 
             // Show numeric result (round to 2 decimals)
             if (required > 100) {
