@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Final Exam Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subhead {
+            color: #475569;
+            margin-bottom: 32px;
+            font-size: 1rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+            background: #f8fafc;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+        }
+        .input-group {
+            margin-bottom: 24px;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #334155;
+            display: block;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        input:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+        }
+        button {
+            width: 100%;
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 16px;
+            box-shadow: 0 8px 20px -8px #1e293b;
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            background: #0f172a;
+            transform: scale(1.01);
+        }
+        .result-card {
+            margin-top: 32px;
+            background: #f1f5f9;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .result-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .result-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .result-message {
+            margin-top: 10px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 40px;
+            background: white;
+            display: inline-block;
+        }
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎯 Final Exam <br>Score Needed</h1>
+        <div class="subhead">What do you need to get on the final to reach your goal?</div>
+
+        <div class="input-group">
+            <label>📊 Current grade (%)</label>
+            <input type="number" id="currentGrade" placeholder="e.g. 82" step="any" min="0" max="100">
+        </div>
+
+        <div class="input-group">
+            <label>🎯 Desired grade (%)</label>
+            <input type="number" id="desiredGrade" placeholder="e.g. 90" step="any" min="0" max="100">
+        </div>
+
+        <div class="input-group">
+            <label>⚖️ Exam weight (%)</label>
+            <input type="number" id="examWeight" placeholder="e.g. 40" step="any" min="0" max="100">
+        </div>
+
+        <button id="calculateBtn">Calculate</button>
+
+        <div class="result-card" id="resultArea">
+            <div class="result-label">You need</div>
+            <div class="result-value" id="requiredScore">—</div>
+            <div id="messageBox" class="result-message"></div>
+        </div>
+        <div class="footer-note">✨ No data is saved — just a quick study tool</div>
+    </div>
+
+    <script>
+        const currentInput = document.getElementById('currentGrade');
+        const desiredInput = document.getElementById('desiredGrade');
+        const weightInput = document.getElementById('examWeight');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const requiredSpan = document.getElementById('requiredScore');
+        const messageBox = document.getElementById('messageBox');
+
+        function calculate() {
+            // Get values, replace comma with dot for European keyboards
+            let current = parseFloat(currentInput.value.replace(',', '.'));
+            let desired = parseFloat(desiredInput.value.replace(',', '.'));
+            let weight = parseFloat(weightInput.value.replace(',', '.'));
+
+            // Reset styling
+            requiredSpan.style.color = '#0f172a';
+            messageBox.textContent = '';
+
+            // Validation
+            if (isNaN(current) || isNaN(desired) || isNaN(weight)) {
+                requiredSpan.textContent = '⚠️';
+                messageBox.textContent = 'Fill all fields';
+                return;
+            }
+
+            // Clamp values between 0-100 (good UX)
+            current = Math.min(100, Math.max(0, current));
+            desired = Math.min(100, Math.max(0, desired));
+            weight = Math.min(100, Math.max(0, weight));
+
+            // Update inputs to clamped values (optional but nice)
+            currentInput.value = current;
+            desiredInput.value = desired;
+            weightInput.value = weight;
+
+            // Final exam calculation
+            const required = (desired - current * (1 - weight / 100)) / (weight / 100);
+
+            // Show numeric result (round to 2 decimals)
+            if (required > 100) {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+                requiredSpan.style.color = '#b45309';
+                messageBox.textContent = '😬 Good luck... study hard!';
+            } else if (required < 0) {
+                requiredSpan.textContent = '0%';
+                requiredSpan.style.color = '#047857';
+                messageBox.textContent = '✨ You\'ve already got this!';
+            } else if (required >= 0 && required <= 100) {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+                requiredSpan.style.color = '#1e3a8a';
+                messageBox.textContent = '✅ On track — you can do it!';
+            } else {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+            }
+
+            // If result is exactly 100, message
+            if (Math.abs(required - 100) < 0.01) {
+                messageBox.textContent = '⚡ Exactly 100% — perfect score needed!';
+            }
+        }
+
+        calculateBtn.addEventListener('click', calculate);
+
+        // Allow Enter key to trigger calculation
+        [currentInput, desiredInput, weightInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculate();
+            });
+        });
+    </script>
+</body>
+</html>
