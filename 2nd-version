@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Final Exam Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subhead {
+            color: #475569;
+            margin-bottom: 32px;
+            font-size: 1rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+            background: #f8fafc;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+        }
+        .input-group {
+            margin-bottom: 24px;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #334155;
+            display: block;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        input:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+        }
+        button {
+            width: 100%;
+            background: #1e293b;
+            color: cyan;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 16px;
+            box-shadow: 0 8px 20px -8px #1e293b;
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            background: #0f172a;
+            transform: scale(1.01);
+        }
+        .result-card {
+            margin-top: 32px;
+            background: #f1f5f9;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .result-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .result-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .result-message {
+            margin-top: 10px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 40px;
+            background: white;
+            display: inline-block;
+        }
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+        }
+        .history-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .history-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📚 Final Exam Calculator</h1>
+        <div class="subhead">Calculate the score you need on your final exam</div>
+
+        <div class="input-group">
+            <label>📊 Current grade (%)</label>
+            <input type="number" id="currentGrade" placeholder="e.g. 82" step="any" min="0" max="100">
+        </div>
+
+        <div class="input-group">
+            <label>🎯 Desired grade (%)</label>
+            <input type="number" id="desiredGrade" placeholder="e.g. 90" step="any" min="0" max="100">
+        </div>
+
+        <div class="input-group">
+            <label>⚖️ Final Exam weight (%)</label>
+            <input type="number" id="examWeight" placeholder="e.g. 40" step="any" min="0" max="100">
+        </div>
+
+        <button id="calculateBtn">Calculate</button>
+
+        <div class="result-card" id="resultArea">
+            <div class="result-label">You need</div>
+            <div class="result-value" id="requiredScore">—</div>
+            <div id="messageBox" class="result-message"></div>
+        </div>
+        
+        <!-- History section will be inserted here by JavaScript -->
+        
+        <div class="footer-note">✨ No data is saved — just a quick study tool</div>
+    </div>
+
+    <script>
+        // Original Calculator Functionality
+        const currentInput = document.getElementById('currentGrade');
+        const desiredInput = document.getElementById('desiredGrade');
+        const weightInput = document.getElementById('examWeight');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const requiredSpan = document.getElementById('requiredScore');
+        const messageBox = document.getElementById('messageBox');
+
+        function calculate() {
+            // Get values, replace comma with dot for European keyboards
+            let current = parseFloat(currentInput.value.replace(',', '.'));
+            let desired = parseFloat(desiredInput.value.replace(',', '.'));
+            let weight = parseFloat(weightInput.value.replace(',', '.'));
+
+            // Reset styling
+            requiredSpan.style.color = '#0f172a';
+            messageBox.textContent = '';
+
+            // Validation
+            if (isNaN(current) || isNaN(desired) || isNaN(weight)) {
+                requiredSpan.textContent = '⚠️';
+                messageBox.textContent = 'Fill all fields';
+                return;
+            }
+
+            // Clamp values between 0-100 (good UX)
+            current = Math.min(100, Math.max(0, current));
+            desired = Math.min(100, Math.max(0, desired));
+            weight = Math.min(100, Math.max(0, weight));
+
+            // Update inputs to clamped values (optional but nice)
+            currentInput.value = current;
+            desiredInput.value = desired;
+            weightInput.value = weight;
+
+            // Final exam calculation
+            const required = Math.min((desired - current * (1 - weight / 100)) / (weight / 100),100);
+
+            // Show numeric result (round to 2 decimals)
+            if (required > 100) {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+                requiredSpan.style.color = '#b45309';
+                messageBox.textContent = '😬 Good luck... study hard!';
+            } else if (required < 0) {
+                requiredSpan.textContent = '0%';
+                requiredSpan.style.color = '#047857';
+                messageBox.textContent = '✨ You\'ve already got this!';
+            } else if (required >= 0 && required <= 100) {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+                requiredSpan.style.color = '#1e3a8a';
+                messageBox.textContent = '✅ On track — you can do it!';
+            } else {
+                requiredSpan.textContent = required.toFixed(1) + '%';
+            }
+
+            // If result is exactly 100, message
+            if (Math.abs(required - 100) < 0.01) {
+                messageBox.textContent = '⚡ Exactly 100% — perfect score needed!';
+            }
+            
+            return required;
+        }
+
+        calculateBtn.addEventListener('click', calculate);
+
+        // Allow Enter key to trigger calculation
+        [currentInput, desiredInput, weightInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculate();
+            });
+        });
+
+        // ===========================================
+        // NEW FEATURE: Grade History Tracking
+        // ===========================================
+        const historyKey = 'gradeHistory';
+        const maxHistoryItems = 5;
+
+        // Initialize history from localStorage
+        let gradeHistory = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+        // Create history display element
+        const historyDiv = document.createElement('div');
+        historyDiv.className = 'history-section';
+        historyDiv.innerHTML = `
+            <div style="margin-top: 24px; border-top: 2px dashed #cbd5e1; padding-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 600; color: #334155;">📋 Recent Calculations</span>
+                    <button id="clearHistoryBtn" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; box-shadow: none; border-radius: 20px; background: #f1f5f9;">Clear</button>
+                </div>
+                <div id="historyList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        `;
+
+        // Insert history after result card
+        document.querySelector('.card').insertBefore(historyDiv, document.querySelector('.footer-note'));
+
+        function addToHistory(current, desired, weight, required) {
+            const historyItem = {
+                id: Date.now(),
+                current: current,
+                desired: desired,
+                weight: weight,
+                required: required,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            gradeHistory.unshift(historyItem);
+            
+            // Keep only last 5 items
+            if (gradeHistory.length > maxHistoryItems) {
+                gradeHistory = gradeHistory.slice(0, maxHistoryItems);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem(historyKey, JSON.stringify(gradeHistory));
+            
+            // Update display
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+            if (!historyList) return;
+            
+            if (gradeHistory.length === 0) {
+                historyList.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 12px; background: #f8fafc; border-radius: 12px;">No calculations yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = gradeHistory.map(item => `
+                <div class="history-item" data-id="${item.id}">
+                    <div>
+                        <span style="font-weight: 600;">${item.required.toFixed(1)}%</span>
+                        <span style="color: #64748b; margin-left: 6px;">(C:${item.current}% → D:${item.desired}%, W:${item.weight}%)</span>
+                    </div>
+                    <span style="color: #94a3b8; font-size: 0.7rem;">${item.timestamp}</span>
+                </div>
+            `).join('');
+            
+            // Add click-to-fill functionality
+            document.querySelectorAll('.history-item').forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    const historyItem = gradeHistory[index];
+                    if (historyItem) {
+                        currentInput.value = historyItem.current;
+                        desiredInput.value = historyItem.desired;
+                        weightInput.value = historyItem.weight;
+                        calculate();
+                    }
+                });
+            });
+        }
+
+        // Clear history button
+        document.getElementById('clearHistoryBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            gradeHistory = [];
+            localStorage.removeItem(historyKey);
+            displayHistory();
+        });
+
+        // Override calculate function to include history
+        const originalCalculate = calculate;
+        calculate = function() {
+            const required = originalCalculate();
+            
+            // Get values for history
+            let current = parseFloat(currentInput.value.replace(',', '.'));
+            let desired = parseFloat(desiredInput.value.replace(',', '.'));
+            let weight = parseFloat(weightInput.value.replace(',', '.'));
+            
+            if (!isNaN(current) && !isNaN(desired) && !isNaN(weight) && 
+                required !== '⚠️' && requiredSpan.textContent !== '—') {
+                const requiredValue = parseFloat(requiredSpan.textContent);
+                if (!isNaN(requiredValue)) {
+                    addToHistory(current, desired, weight, requiredValue);
+                }
+            }
+        };
+
+        // Re-attach event listener with new calculate function
+        calculateBtn.removeEventListener('click', originalCalculate);
+        calculateBtn.addEventListener('click', calculate);
+
+        // Update Enter key handlers
+        [currentInput, desiredInput, weightInput].forEach(input => {
+            input.removeEventListener('keypress', (e) => {
+                if (e.key === 'Enter') originalCalculate();
+            });
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculate();
+            });
+        });
+
+        // Display history on load
+        displayHistory();
+    </script>
+</body>
+</html>
